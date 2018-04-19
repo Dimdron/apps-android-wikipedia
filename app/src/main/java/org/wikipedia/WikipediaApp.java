@@ -1,7 +1,7 @@
 package org.wikipedia;
 
 import android.app.Activity;
-import android.app.Application;
+import android.content.Context;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -9,10 +9,13 @@ import android.os.Handler;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.Window;
 import android.webkit.WebView;
 
+import com.appspector.sdk.core.AppSpector;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.squareup.leakcanary.LeakCanary;
@@ -67,9 +70,9 @@ import static org.wikipedia.settings.Prefs.getTextSizeMultiplier;
 import static org.wikipedia.util.DimenUtil.getFontSizeFromSp;
 import static org.wikipedia.util.ReleaseUtil.getChannel;
 
-public class WikipediaApp extends Application {
+public class WikipediaApp extends MultiDexApplication {
     private static final int EVENT_LOG_TESTING_ID = new Random().nextInt(Integer.MAX_VALUE);
-
+    private static WikipediaApp INSTANCE;
     private final RemoteConfig remoteConfig = new RemoteConfig();
     private final Map<Class<?>, DatabaseClient<?>> databaseClients = Collections.synchronizedMap(new HashMap<Class<?>, DatabaseClient<?>>());
     private Handler mainThreadHandler;
@@ -87,8 +90,7 @@ public class WikipediaApp extends Application {
     private Bus bus;
     private Theme currentTheme = Theme.getFallback();
     private WikipediaZeroHandler zeroHandler;
-
-    private static WikipediaApp INSTANCE;
+    private AppSpector appSpector;
 
     public WikipediaApp() {
         INSTANCE = this;
@@ -96,6 +98,12 @@ public class WikipediaApp extends Application {
 
     public static WikipediaApp getInstance() {
         return INSTANCE;
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     public SessionFunnel getSessionFunnel() {
@@ -128,6 +136,7 @@ public class WikipediaApp extends Application {
 
     /**
      * Gets the currently-selected theme for the app.
+     *
      * @return Theme that is currently selected, which is the actual theme ID that can
      * be passed to setTheme() when creating an activity.
      */
@@ -136,9 +145,26 @@ public class WikipediaApp extends Application {
         return currentTheme;
     }
 
+    /**
+     * Sets the theme of the app. If the new theme is the same as the current theme, nothing happens.
+     * Otherwise, an event is sent to notify of the theme change.
+     */
+    public void setCurrentTheme(@NonNull Theme theme) {
+        if (theme != currentTheme) {
+            currentTheme = theme;
+            Prefs.setThemeId(currentTheme.getMarshallingId());
+            bus.post(new ThemeChangeEvent());
+        }
+    }
+
     @NonNull
     public String getAppLanguageCode() {
         return defaultString(appLanguageState.getAppLanguageCode());
+    }
+
+    public void setAppLanguageCode(@Nullable String code) {
+        appLanguageState.setAppLanguageCode(code);
+        resetWikiSite();
     }
 
     @NonNull
@@ -153,11 +179,6 @@ public class WikipediaApp extends Application {
     @NonNull
     public String getSystemLanguageCode() {
         return appLanguageState.getSystemLanguageCode();
-    }
-
-    public void setAppLanguageCode(@Nullable String code) {
-        appLanguageState.setAppLanguageCode(code);
-        resetWikiSite();
     }
 
     @Nullable
@@ -192,6 +213,17 @@ public class WikipediaApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        appSpector = AppSpector
+                .builder(this)
+                .addPerformanceMonitor()
+                .addHttpMonitor()
+                .addLogMonitor()
+                .addScreenshotMonitor()
+                .addSQLMonitor()
+                .addDeviceInfoMonitor()
+                .addFileMonitor()
+                .build(BuildConfig.APPSPECTOR_API_KEY);
 
         zeroHandler = new WikipediaZeroHandler(this);
 
@@ -262,7 +294,8 @@ public class WikipediaApp extends Application {
      * Default wiki for the app
      * You should use PageTitle.getWikiSite() to get the article wiki
      */
-    @NonNull public WikiSite getWikiSite() {
+    @NonNull
+    public WikiSite getWikiSite() {
         // TODO: why don't we ensure that the app language hasn't changed here instead of the client?
         if (wiki == null) {
             String lang = Prefs.getMediaWikiBaseUriSupportsLangCode() ? getAppOrSystemLanguageCode() : "";
@@ -294,6 +327,7 @@ public class WikipediaApp extends Application {
     /**
      * Get this app's unique install ID, which is a UUID that should be unique for each install
      * of the app. Useful for anonymous analytics.
+     *
      * @return Unique install ID for this app.
      */
     public String getAppInstallID() {
@@ -310,27 +344,16 @@ public class WikipediaApp extends Application {
      * sampling, that is, whether the user's instance of the app sends any events or not. This is a
      * pure technical measure which is necessary to prevent overloading EventLogging with too many
      * events. This value will persist for the lifetime of the app.
-     *
+     * <p>
      * Don't use this method when running to determine whether or not the user falls into a control
      * or test group in any kind of tests (such as A/B tests), as that would introduce sampling
      * biases which would invalidate the test.
+     *
      * @return Integer ID for event log sampling.
      */
     @IntRange(from = 0)
     public int getEventLogSamplingID() {
         return EVENT_LOG_TESTING_ID;
-    }
-
-    /**
-     * Sets the theme of the app. If the new theme is the same as the current theme, nothing happens.
-     * Otherwise, an event is sent to notify of the theme change.
-     */
-    public void setCurrentTheme(@NonNull Theme theme) {
-        if (theme != currentTheme) {
-            currentTheme = theme;
-            Prefs.setThemeId(currentTheme.getMarshallingId());
-            bus.post(new ThemeChangeEvent());
-        }
     }
 
     public boolean setFontSizeMultiplier(int multiplier) {
@@ -371,6 +394,7 @@ public class WikipediaApp extends Application {
     /**
      * Gets the current size of the app's font. This is given as a device-specific size (not "sp"),
      * and can be passed directly to setTextSize() functions.
+     *
      * @param window The window on which the font will be displayed.
      * @return Actual current size of the font.
      */
