@@ -13,7 +13,7 @@ jobs:
             command: ./gradlew androidDependencies
         - run:
             name: Assemble build
-            command: ./gradlew clean :app:assembleDev
+            command: ./gradlew clean :app:assembleDevDebug
         - run:
             name: Upload to HockeyApp
             command: sh ./hockeyapp-upload.sh
