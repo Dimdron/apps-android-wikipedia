@@ -9,9 +9,6 @@ jobs:
       steps:
         - checkout
         - run:
-            name: Download Dependencies
-            command: ./gradlew androidDependencies
-        - run:
             name: Assemble build
             command: ./gradlew clean :app:assembleDevDebug
         - run:
