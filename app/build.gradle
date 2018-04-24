@@ -86,7 +86,7 @@ android {
             }
         }
 
-        buildConfigField "String", "APPSPECTOR_API_KEY", "\"" + System.getenv('APPSPECTOR_API_KEY') + "\"" ?: "\"\""
+        buildConfigField "String", "APPSPECTOR_API_KEY", "\"" + (System.getenv('APPSPECTOR_API_KEY') ?: "") + "\""
     }
 
     sourceSets {
@@ -189,7 +189,7 @@ apply from: '../gradle/src/screenshot.gradle'
 
 dependencies {
 
-    implementation "com.appspector:android-sdk:0.2.0-SNAPSHOT"
+    implementation group: "com.appspector", name: "android-sdk", version: "0.2.2-SNAPSHOT", changing: true
 
     // To keep the Maven Central dependencies up-to-date
     // use http://gradleplease.appspot.com/ or http://search.maven.org/.
