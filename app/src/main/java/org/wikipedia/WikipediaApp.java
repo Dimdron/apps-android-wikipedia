@@ -215,14 +215,14 @@ public class WikipediaApp extends MultiDexApplication {
         super.onCreate();
 
         appSpector = AppSpector
-                .builder(this)
+                .build(this)
                 .addPerformanceMonitor()
                 .addHttpMonitor()
                 .addLogMonitor()
                 .addScreenshotMonitor()
                 .addSQLMonitor()
                 .addMetadata("APPSPECTOR_API_HOST", "https://api.staging.appspector.com")
-                .build(BuildConfig.APPSPECTOR_API_KEY);
+                .run(BuildConfig.APPSPECTOR_API_KEY);
 
         zeroHandler = new WikipediaZeroHandler(this);
 
