@@ -40,7 +40,7 @@ repositories {
     google()
 
     maven {
-        url "https://artifactory.techery.io/artifactory/appspector"
+        url "https://maven.appspector.com/artifactory/android-sdk-beta"
     }
 }
 
@@ -189,7 +189,7 @@ apply from: '../gradle/src/screenshot.gradle'
 
 dependencies {
 
-    implementation group: "com.appspector", name: "android-sdk", version: "0.2.4-SNAPSHOT", changing: true
+    implementation group: "com.appspector", name: "android-sdk", version: "0.5.0"
 
     // To keep the Maven Central dependencies up-to-date
     // use http://gradleplease.appspot.com/ or http://search.maven.org/.

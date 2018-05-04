@@ -4,14 +4,14 @@ buildscript {
         google()
 
         maven {
-            url "https://artifactory.techery.io/artifactory/appspector"
+            url "https://maven.appspector.com/artifactory/android-sdk-beta"
         }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
         classpath 'com.facebook.testing.screenshot:plugin:0.4.2'
-        classpath "com.appspector:android-sdk-plugin:0.2.0-SNAPSHOT"
+        classpath "com.appspector:android-sdk-plugin:0.5.0"
     }
 }
 

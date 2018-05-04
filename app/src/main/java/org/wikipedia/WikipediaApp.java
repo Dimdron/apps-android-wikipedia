@@ -15,7 +15,7 @@ import android.support.v7.app.AppCompatDelegate;
 import android.view.Window;
 import android.webkit.WebView;
 
-import com.appspector.sdk.core.AppSpector;
+import com.appspector.sdk.AppSpector;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.squareup.leakcanary.LeakCanary;
