@@ -1,5 +1,6 @@
 curl \
   -F "status=2" \
+  -F "notes=$RELEASE_NOTES"
   -F "ipa=@app/build/outputs/apk/dev/debug/app-dev-debug.apk" \
   -F "notify=1" \
   -H "X-HockeyAppToken: $HOCKEY_APP_TOKEN" \
