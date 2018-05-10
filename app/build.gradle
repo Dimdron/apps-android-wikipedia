@@ -33,7 +33,7 @@ def static getDate() {
 }
 
 def computeVersionName(label) {
-    return "2.7.${android.defaultConfig.versionCode}-${label}-${System.getenv('CIRCLE_BUILD_NUM')}"
+    return "2.7.${android.defaultConfig.versionCode}-apsdk-${System.getenv('APPSPECTOR_SDK_VERSION')}-${System.getenv('CIRCLE_BUILD_NUM')}"
 }
 
 repositories {
