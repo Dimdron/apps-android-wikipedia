@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 //final Properties REPO_PROPS = loadProperties(REPO_PROPS_FILE)
 
 final int ADB_TIMEOUT = TimeUnit.MINUTES.toMillis(15)
-final boolean continuousIntegrationBuild = System.getenv('JENKINS_HOME') != null
+final boolean continuousIntegrationBuild = System.getenv('CIRCLE_BUILD_NUM') != null
 final boolean preDexEnabled = hasProperty('pre.dex') ?
         Boolean.valueOf(getProperty('pre.dex').toString()) :
         !continuousIntegrationBuild
@@ -33,14 +33,14 @@ def static getDate() {
 }
 
 def computeVersionName(label) {
-    return "2.7.${android.defaultConfig.versionCode}-${label}-${date}"
+    return "2.7.${android.defaultConfig.versionCode}-${label}-${System.getenv('CIRCLE_BUILD_NUM')}"
 }
 
 repositories {
     google()
 
     maven {
-        url "https://maven.appspector.com/artifactory/android-sdk"
+        url System.getenv('APPSPECTOR_MAVEN_URL') ?: "https://maven.appspector.com/artifactory/android-sdk"
     }
 }
 
