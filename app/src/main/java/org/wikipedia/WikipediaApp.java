@@ -221,7 +221,7 @@ public class WikipediaApp extends MultiDexApplication {
                 .addLogMonitor()
                 .addScreenshotMonitor()
                 .addSQLMonitor()
-                .run("ZWJkMzYwZGItNTA4Ni00Zjc4LWFkY2UtMzk4MTEwMmU2OGJk");
+                .run(BuildConfig.APPSPECTOR_API_KEY);
 
         zeroHandler = new WikipediaZeroHandler(this);
 
