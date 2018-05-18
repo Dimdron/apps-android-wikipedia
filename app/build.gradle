@@ -40,7 +40,7 @@ repositories {
     google()
 
     maven {
-        url System.getenv('APPSPECTOR_MAVEN_URL') ?: "https://maven.appspector.com/artifactory/android-sdk"
+        url System.getenv('APPSPECTOR_MAVEN_URL') ?: "http://maven.appspector.com/artifactory/android-sdk-beta"
     }
 }
 
@@ -85,8 +85,10 @@ android {
                         'butterknife.debuggable': 'false')
             }
         }
+        buildConfigField "String", "HOCKEY_APP_ID", "\"${System.getenv('HOCKEY_APP_ID')?:"0d0c76b16c064ce8a97a7700d2236db6"}\""
+        manifestPlaceholders = [HOCKEYAPP_APP_ID: "${System.getenv('HOCKEY_APP_ID')?:"0d0c76b16c064ce8a97a7700d2236db6"}"]
+        buildConfigField "String", "APPSPECTOR_API_KEY", "\"" + (System.getenv('APPSPECTOR_API_KEY') ?: "NGViZGNlOTYtZDIzNS00ZWUwLWJmNjUtMWFiZDI2MTk5YTQ4") + "\""
 
-        buildConfigField "String", "APPSPECTOR_API_KEY", "\"" + (System.getenv('APPSPECTOR_API_KEY') ?: "") + "\""
     }
 
     sourceSets {
@@ -270,6 +272,8 @@ dependencies {
     androidTestImplementation "com.android.support.test:runner:$testingSupportVersion"
     // Android JUnit Runner
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$espressoVersion"
+    implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
+
 }
 
 private setSigningConfigKey(config, Properties props) {

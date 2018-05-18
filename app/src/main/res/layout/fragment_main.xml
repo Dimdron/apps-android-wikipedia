@@ -12,6 +12,14 @@
         android:orientation="vertical"
         android:layout_marginTop="?attr/actionBarSize">
 
+        <Button
+            android:id="@+id/crashButton"
+            android:layout_width="match_parent"
+            android:text="Crash App for Test"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:layout_height="wrap_content" />
+
         <android.support.design.widget.CoordinatorLayout
             android:id="@+id/fragment_main_coordinator"
             android:layout_width="match_parent"

@@ -7,7 +7,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.view.ActionMode;
 import android.view.View;
+import android.widget.Toast;
 
+import net.hockeyapp.android.CrashManager;
+
+import org.wikipedia.BuildConfig;
 import org.wikipedia.R;
 import org.wikipedia.activity.SingleFragmentToolbarActivity;
 import org.wikipedia.appshortcuts.AppShortcuts;
@@ -34,7 +38,8 @@ public class MainActivity extends SingleFragmentToolbarActivity<MainFragment>
         }
     }
 
-    @Override protected MainFragment createFragment() {
+    @Override
+    protected MainFragment createFragment() {
         return MainFragment.newInstance();
     }
 
@@ -116,5 +121,10 @@ public class MainActivity extends SingleFragmentToolbarActivity<MainFragment>
             return;
         }
         finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }
