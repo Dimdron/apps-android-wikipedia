@@ -123,6 +123,15 @@ public class MainFragment extends Fragment implements BackPressedHandler, FeedFr
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.findViewById(R.id.crashButton).setOnClickListener(v -> {
+            Object object = null;
+            object.hashCode();
+        });
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         downloadReceiver.setCallback(null);

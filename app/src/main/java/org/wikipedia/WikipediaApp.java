@@ -22,13 +22,15 @@ import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 import com.squareup.otto.Bus;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.CrashManagerListener;
+
 import org.wikipedia.analytics.FunnelManager;
 import org.wikipedia.analytics.SessionFunnel;
 import org.wikipedia.auth.AccountUtil;
 import org.wikipedia.concurrency.ThreadSafeBus;
 import org.wikipedia.connectivity.NetworkConnectivityReceiver;
 import org.wikipedia.crash.CrashReporter;
-import org.wikipedia.crash.hockeyapp.HockeyAppCrashReporter;
 import org.wikipedia.database.Database;
 import org.wikipedia.database.DatabaseClient;
 import org.wikipedia.dataclient.SharedPreferenceCookieManager;
@@ -216,20 +218,15 @@ public class WikipediaApp extends MultiDexApplication {
 
         appSpector = AppSpector
                 .build(this)
-                .addPerformanceMonitor()
-                .addHttpMonitor()
-                .addLogMonitor()
-                .addScreenshotMonitor()
-                .addSQLMonitor()
+                .withDefaultMonitors()
                 .run(BuildConfig.APPSPECTOR_API_KEY);
 
         zeroHandler = new WikipediaZeroHandler(this);
 
         // HockeyApp exception handling interferes with the test runner, so enable it only for
         // beta and stable releases
-        if (!ReleaseUtil.isPreBetaRelease()) {
-            initExceptionHandling();
-        }
+
+        initExceptionHandling();
 
         refWatcher = Prefs.isMemoryLeakTestEnabled() ? LeakCanary.install(this) : RefWatcher.DISABLED;
 
@@ -419,10 +416,12 @@ public class WikipediaApp extends MultiDexApplication {
     }
 
     private void initExceptionHandling() {
-        crashReporter = new HockeyAppCrashReporter(getString(R.string.hockeyapp_app_id), consentAccessor());
-        crashReporter.registerCrashHandler(this);
-
-        L.setRemoteLogger(crashReporter);
+        CrashManager.register(this, new CrashManagerListener() {
+            @Override
+            public boolean shouldAutoUploadCrashes() {
+                return true;
+            }
+        });
     }
 
     private CrashReporter.AutoUploadConsentAccessor consentAccessor() {
@@ -476,4 +475,5 @@ public class WikipediaApp extends MultiDexApplication {
             }
         });
     }
+
 }

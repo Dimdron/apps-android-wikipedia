@@ -27,17 +27,29 @@
         android:maxSdkVersion="22" />
 
     <!-- For notifications, e.g. User account notices, Wikipedia Zero, etc. -->
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- For being able to receive notifications upon boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- For Nearby feature -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-feature android:name="android.hardware.location" tools:node="replace" android:required="false" />
-    <uses-feature android:name="android.hardware.location.gps" tools:node="replace" android:required="false" />
-    <uses-feature android:name="android.hardware.location.network" android:required="false" />
-    <uses-feature android:name="android.hardware.wifi" tools:node="replace" android:required="false"  />
+
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false"
+        tools:node="replace" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false"
+        tools:node="replace" />
+    <uses-feature
+        android:name="android.hardware.location.network"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false"
+        tools:node="replace" />
 
     <!-- For keeping the device awake while performing background tasks, such as syncing offline articles. -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -46,36 +58,47 @@
         Don't let Google Play filter out devices that just have fake touch
         (e.g. mouse and keyboard instead of a real touchscreen).
     -->
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
 
     <application
+        android:name=".WikipediaApp"
         android:allowBackup="true"
         android:fullBackupContent="@xml/full_backup_rules"
-        tools:replace="android:allowBackup"
-        android:supportsRtl="true"
         android:icon="@mipmap/launcher"
         android:label="@string/app_name"
-        android:name=".WikipediaApp"
-        android:theme="@style/AppTheme">
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup">
 
         <!-- Multi-window support on Samsung devices -->
-        <uses-library android:required="false" android:name="com.sec.android.app.multiwindow" />
-        <meta-data android:name="com.sec.android.support.multiwindow" android:value="true" />
+        <uses-library
+            android:name="com.sec.android.app.multiwindow"
+            android:required="false" />
+        <meta-data
+            android:name="com.sec.android.support.multiwindow"
+            android:value="true" />
 
         <!--
         The following is used for determining the distribution channel.
         Set "value" to "Google Play" for Google Play Store.
         -->
-        <meta-data android:name="@string/preference_key_app_channel" android:value="@string/channel" />
-        <meta-data android:name="net.hockeyapp.android.appIdentifier"
-            android:value="@string/hockeyapp_app_id" />
+        <meta-data
+            android:name="@string/preference_key_app_channel"
+            android:value="@string/channel" />
+
+        <meta-data
+            android:name="net.hockeyapp.android.appIdentifier"
+            android:value="${HOCKEYAPP_APP_ID}" />
 
         <activity
             android:name=".main.MainActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
             </intent-filter>
@@ -92,23 +115,31 @@
         </activity>
         <activity
             android:name=".page.PageActivity"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/AppTheme.Page"
             android:launchMode="singleTask"
-            android:parentActivityName=".main.MainActivity">
+            android:parentActivityName=".main.MainActivity"
+            android:theme="@style/AppTheme.Page"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".main.MainActivity" />
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- the following lines are merged
                      https://developer.android.com/training/app-links/deep-linking.html
                      so http and https apply to all prefixes-->
-                <data android:host="*.wikipedia.org" android:pathPrefix="/wiki/" android:scheme="http" />
-                <data android:host="*.wikipedia.org" android:pathPattern="/zh-.*" android:scheme="https" />
+                <data
+                    android:host="*.wikipedia.org"
+                    android:pathPrefix="/wiki/"
+                    android:scheme="http" />
+                <data
+                    android:host="*.wikipedia.org"
+                    android:pathPattern="/zh-.*"
+                    android:scheme="https" />
             </intent-filter>
             <intent-filter>
                 <action android:name="org.wikipedia.app_shortcut" />
@@ -117,24 +148,24 @@
         </activity>
         <activity
             android:name=".crash.CrashReportActivity"
+            android:excludeFromRecents="true"
             android:label="@string/crash_report_activity_title"
-            android:noHistory="true"
-            android:excludeFromRecents="true" />
+            android:noHistory="true" />
         <activity
             android:name=".settings.SettingsActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/settings_activity_title"
-            android:theme="@style/AppTheme.ActionBar"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+            android:theme="@style/AppTheme.ActionBar" />
         <activity
             android:name=".settings.DeveloperSettingsActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/developer_settings_activity_title"
-            android:theme="@style/AppTheme.ActionBar"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+            android:theme="@style/AppTheme.ActionBar" />
         <activity
             android:name=".settings.AboutActivity"
+            android:exported="false"
             android:label="@string/about_activity_title"
-            android:theme="@style/AppTheme.ActionBar"
-            android:exported="false">
+            android:theme="@style/AppTheme.ActionBar">
             <intent-filter>
                 <action android:name=".settings.AboutActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -142,26 +173,26 @@
         </activity>
         <activity
             android:name=".language.LangLinksActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/langlinks_activity_title"
-            android:theme="@style/AppTheme.ActionBar.Page"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+            android:theme="@style/AppTheme.ActionBar.Page" />
         <activity
             android:name=".edit.EditSectionActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:theme="@style/AppTheme.ActionBar.Page"
-            android:windowSoftInputMode="adjustResize|stateVisible"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+            android:windowSoftInputMode="adjustResize|stateVisible" />
         <activity
             android:name=".login.LoginActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/login_activity_title"
             android:theme="@style/AppTheme.ActionBar"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
         <activity
             android:name=".createaccount.CreateAccountActivity"
-            android:theme="@style/AppTheme.ActionBar"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/create_account_activity_title"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+            android:theme="@style/AppTheme.ActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
         <activity
             android:name=".gallery.GalleryActivity"
             android:configChanges="orientation|screenSize"
@@ -174,12 +205,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:pathPrefix="/android_asset/licenses/" android:scheme="content" />
+                <data
+                    android:pathPrefix="/android_asset/licenses/"
+                    android:scheme="content" />
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".feed.news.NewsActivity" />
+        <activity android:name=".feed.news.NewsActivity" />
 
         <activity
             android:name=".descriptions.DescriptionEditActivity"
@@ -190,71 +222,75 @@
             android:theme="@style/AppTheme.FullScreen.TranslucentDark"
             android:windowSoftInputMode="stateAlwaysHidden" />
 
-        <activity
-            android:name=".descriptions.DescriptionEditHelpActivity" />
+        <activity android:name=".descriptions.DescriptionEditHelpActivity" />
 
-        <activity
-            android:name=".descriptions.DescriptionEditTutorialActivity" />
+        <activity android:name=".descriptions.DescriptionEditTutorialActivity" />
 
-        <activity
-            android:name=".readinglist.ReadingListActivity" />
+        <activity android:name=".readinglist.ReadingListActivity" />
 
-        <activity
-            android:name=".onboarding.InitialOnboardingActivity" />
+        <activity android:name=".onboarding.InitialOnboardingActivity" />
 
         <activity
             android:name=".offline.LocalCompilationsActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="content" android:mimeType="application/zim" />
-                <data android:scheme="file" android:pathPattern=".*\\.zim" />
+
+                <data
+                    android:mimeType="application/zim"
+                    android:scheme="content" />
+                <data
+                    android:pathPattern=".*\\.zim"
+                    android:scheme="file" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".offline.RemoteCompilationsActivity"
-            android:theme="@style/AppTheme.GreenActionMode"/>
+            android:theme="@style/AppTheme.GreenActionMode" />
 
-        <activity
-            android:name=".offline.CompilationDetailActivity" />
+        <activity android:name=".offline.CompilationDetailActivity" />
 
         <activity
             android:name=".offline.OfflineTutorialActivity"
-            android:theme="@style/AppTheme.TranslucentStatus"/>
+            android:theme="@style/AppTheme.TranslucentStatus" />
 
         <activity
             android:name=".feed.mostread.MostReadArticlesActivity"
-            android:theme="@style/AppTheme.ActionBar"/>
+            android:theme="@style/AppTheme.ActionBar" />
 
-        <activity android:name=".feed.onthisday.OnThisDayActivity"
-            android:configChanges="orientation|screenSize"/>
+        <activity
+            android:name=".feed.onthisday.OnThisDayActivity"
+            android:configChanges="orientation|screenSize" />
 
-        <activity android:name=".feed.configure.ConfigureActivity"
+        <activity
+            android:name=".feed.configure.ConfigureActivity"
             android:label="@string/feed_configure_activity_title"
-            android:theme="@style/AppTheme.ActionBar"/>
+            android:theme="@style/AppTheme.ActionBar" />
 
-        <activity android:name=".random.RandomActivity"
+        <activity
+            android:name=".random.RandomActivity"
             android:label="@string/view_random_card_title"
-            android:theme="@style/AppTheme.ActionBar"/>
+            android:theme="@style/AppTheme.ActionBar" />
 
-        <activity android:name=".theme.ThemeFittingRoomActivity"
+        <activity
+            android:name=".theme.ThemeFittingRoomActivity"
             android:label="@string/preference_title_app_theme"
-            android:theme="@style/AppTheme.ActionBar"/>
+            android:theme="@style/AppTheme.ActionBar" />
 
         <provider
-            android:authorities="${applicationId}"
             android:name=".database.AppContentProvider"
+            android:authorities="${applicationId}"
             android:exported="false" />
 
         <provider
-            android:authorities="@string/reading_lists_authority"
             android:name=".database.ReadingListsContentProvider"
+            android:authorities="@string/reading_lists_authority"
             android:exported="false"
-            android:syncable="true"
-            android:label="@string/user_option_sync_label" />
+            android:label="@string/user_option_sync_label"
+            android:syncable="true" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -272,10 +308,10 @@
             android:exported="false" />
 
         <receiver
+            android:name="org.wikipedia.widgets.WidgetProviderSearch"
             android:icon="@mipmap/launcher"
-            android:label="@string/widget_name_search"
-            android:name="org.wikipedia.widgets.WidgetProviderSearch" >
-            <intent-filter >
+            android:label="@string/widget_name_search">
+            <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
@@ -285,10 +321,10 @@
         </receiver>
 
         <receiver
+            android:name="org.wikipedia.widgets.WidgetProviderFeaturedPage"
             android:icon="@mipmap/launcher"
-            android:label="@string/widget_name_featured_page"
-            android:name="org.wikipedia.widgets.WidgetProviderFeaturedPage" >
-            <intent-filter >
+            android:label="@string/widget_name_featured_page">
+            <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
