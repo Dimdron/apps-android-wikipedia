@@ -191,8 +191,6 @@ apply from: '../gradle/src/screenshot.gradle'
 
 dependencies {
 
-    implementation "com.appspector:android-sdk:+"
-
     // To keep the Maven Central dependencies up-to-date
     // use http://gradleplease.appspot.com/ or http://search.maven.org/.
     // Debug with ./gradlew -q app:dependencies --configuration compile
@@ -273,6 +271,9 @@ dependencies {
     // Android JUnit Runner
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$espressoVersion"
     implementation 'net.hockeyapp.android:HockeySDK:5.1.0'
+    implementation ("com.appspector:android-sdk:+"){
+        exclude group:"com.android.support:support-core-ui"
+    }
 
 }
 

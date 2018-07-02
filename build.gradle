@@ -1,8 +1,8 @@
 buildscript {
 
     repositories {
-        jcenter()
         google()
+        jcenter()
 
         maven {
             url System.getenv('APPSPECTOR_MAVEN_URL') ?: "http://maven.appspector.com/artifactory/android-sdk-beta"
@@ -18,7 +18,7 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
         google()
+        jcenter()
     }
 }

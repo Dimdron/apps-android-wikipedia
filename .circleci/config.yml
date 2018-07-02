@@ -13,6 +13,6 @@ jobs:
             command: ./gradlew clean :app:assembleDevDebug
         - run:
             name: Upload to HockeyApp
-            command: sh ./hockeyapp-upload.sh
+            command: sh ./.circleci/hockeyapp-upload.sh
             environment:
-                  APK_PATH: app/build/outputs/apk/dev/debug/app-dev-debug.apk
+                APK_PATH: app/build/outputs/apk/dev/debug/app-dev-debug.apk
