@@ -2,17 +2,22 @@ version: 2
 jobs:
   build:
       docker:
-        - image: circleci/android:api-27-alpha
+        - image: circleci/android:api-27-node
       working_directory: ~/code
       environment:
         JVM_OPTS: -Xmx3200m
       steps:
         - checkout
         - run:
+            name: Install Appcenter
+            command: sudo npm install appcenter-cli -g
+        - run:
+           name: Sign In to Appcenter
+           command: appcenter login --token $APPCENTER_TOKEN
+        - run:
             name: Assemble build
             command: ./gradlew clean :app:assembleDevDebug
         - run:
-            name: Upload to HockeyApp
-            command: sh ./.circleci/hockeyapp-upload.sh
-            environment:
-                APK_PATH: app/build/outputs/apk/dev/debug/app-dev-debug.apk
+           name: Upload to Appcenter
+           command: appcenter distribute release --debug --app $APPCENTER_APP_NAME --file app/build/outputs/apk/dev/debug/app-dev-debug.apk --group $APPCENTER_GROUP
+
