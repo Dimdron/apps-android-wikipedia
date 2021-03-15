@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+//apply plugin: 'com.google.firebase.firebase-perf'
+apply plugin: 'com.appspector.sdk'
 
 // Copy the signing.properties.sample file to ~/.sign/signing.properties and adjust the values.
 final File PROD_PROPS_FILE = new File(System.getProperty('user.home'), '.sign/signing.properties')
@@ -208,6 +210,15 @@ dependencies {
     alphaImplementation "com.google.firebase:firebase-messaging:$firebaseMessagingVersion"
     devImplementation "com.google.firebase:firebase-messaging:$firebaseMessagingVersion"
     customImplementation "com.google.firebase:firebase-messaging:$firebaseMessagingVersion"
+
+    implementation 'com.google.firebase:firebase-perf:19.0.7'
+
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.appspector:android-sdk:1.4.1-SNAPSHOT'
+    implementation 'com.appspector:android-sdk-encryption:1.4.1-SNAPSHOT'
+    implementation 'com.appspector:sqlcipher-extension:1.4.1-SNAPSHOT'
+    implementation 'com.appspector:urlconnection-extension:1.4.1-SNAPSHOT'
+//    implementation 'com.appspector:android-sdk-noop:1.4.1-SNAPSHOT'
 
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterknifeVersion"
 

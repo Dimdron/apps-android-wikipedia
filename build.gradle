@@ -4,10 +4,13 @@ buildscript {
         jcenter()
         google()
         mavenLocal()
+        maven { url "https://maven.appspector.com/artifactory/android-sdk" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.appspector:android-sdk-plugin:1.4.0"
+        classpath 'com.google.firebase:perf-plugin:1.3.1'  // Performance Moni  toring plugin
         classpath 'com.google.gms:google-services:4.3.4'
     }
 }
@@ -18,5 +21,6 @@ allprojects {
         maven { url "https://jitpack.io" }
         google()
         mavenLocal()
+        maven { url "https://maven.appspector.com/artifactory/android-sdk-beta" }
     }
 }

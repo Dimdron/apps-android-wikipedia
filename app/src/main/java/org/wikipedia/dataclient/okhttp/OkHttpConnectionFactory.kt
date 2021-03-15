@@ -1,5 +1,7 @@
 package org.wikipedia.dataclient.okhttp
 
+import com.appspector.sdk.instrumentation.AppSpectorOkHttp3EventListener
+import com.appspector.sdk.instrumentation.AppSpectorOkHttp3Interceptor
 import okhttp3.Cache
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
@@ -33,6 +35,8 @@ object OkHttpConnectionFactory {
                 .addInterceptor(OfflineCacheInterceptor())
                 .addInterceptor(TestStubInterceptor())
                 .addInterceptor(TitleEncodeInterceptor())
+//                .addInterceptor(AppSpectorOkHttp3Interceptor())
+//                .eventListenerFactory(AppSpectorOkHttp3EventListener.Factory())
                 .build()
     }
 }

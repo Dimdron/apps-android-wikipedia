@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Window;
 import android.webkit.WebView;
 
@@ -14,6 +15,31 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.appspector.sdk.AppSpector;
+import com.appspector.sdk.SessionUrlListener;
+import com.appspector.sdk.activity.lifecicle.ActivityLifecycleTracker;
+import com.appspector.sdk.core.util.AppspectorLogger;
+import com.appspector.sdk.monitors.commands.BaseCommand;
+import com.appspector.sdk.monitors.commands.CommandCallback;
+import com.appspector.sdk.monitors.commands.Responder;
+import com.appspector.sdk.monitors.commands.annotations.Argument;
+import com.appspector.sdk.monitors.commands.annotations.Command;
+import com.appspector.sdk.monitors.events.CustomEventsSender;
+import com.appspector.sdk.monitors.events.model.CustomEventPayload;
+import com.appspector.sdk.monitors.http.HttpRequest;
+import com.appspector.sdk.monitors.http.HttpResponse;
+import com.appspector.sdk.monitors.http.filter.HTTPFilter;
+import com.appspector.sdk.monitors.log.LogMonitor;
+import com.appspector.sdk.monitors.log.model.LogEvent;
+import com.appspector.sdk.monitors.sharedprefs.SharedPreferencesMonitor;
+import com.appspector.sdk.monitors.sharedprefs.model.PreferenceValue;
+import com.appspector.sdk.monitors.sharedprefs.source.SharedPreferencesSourceFactory;
+import com.appspector.sdk.monitors.sqlite.DatabaseConnection;
+import com.appspector.sdk.monitors.sqlite.SQLCipherDatabaseConnection;
+import com.appspector.sdk.monitors.sqlite.SQLiteDatabaseConnection;
+import com.appspector.sdk.monitors.sqlite.SQLiteMonitor;
+import com.appspector.sdk.urlconnection.instrumentation.UrlInstrument;
+import com.google.firebase.perf.network.FirebasePerfOkHttpClient;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.crashes.Crashes;
 
@@ -49,12 +75,17 @@ import org.wikipedia.util.ReleaseUtil;
 import org.wikipedia.util.log.L;
 import org.wikipedia.views.ViewAnimations;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
 import java.util.UUID;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -62,6 +93,7 @@ import io.reactivex.rxjava3.internal.functions.Functions;
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
+import static com.appspector.sdk.AppSpector.build;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.wikipedia.settings.Prefs.getTextSizeMultiplier;
 import static org.wikipedia.util.DimenUtil.getFontSizeFromSp;
@@ -140,6 +172,14 @@ public class WikipediaApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        ActivityLifecycleTracker.init(this);
+
+        getMainThreadHandler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                initAppSpector();
+            }
+        }, 3000);
 
         WikiSite.setDefaultBaseUrl(Prefs.getMediaWikiBaseUrl());
 
@@ -185,6 +225,116 @@ public class WikipediaApp extends Application {
         // For good measure, explicitly call our token subscription function, in case the
         // API failed in previous attempts.
         WikipediaFirebaseMessagingService.Companion.updateSubscription();
+    }
+
+    private void initAppSpector() {
+        AppSpector
+                .build(this)
+                .withDefaultMonitors()
+                .addSharedPreferenceMonitor(SharedPreferencesSourceFactory.excludeFiles("WebViewChromiumPrefs"), new SharedPreferencesMonitor.Filter() {
+                    @NonNull
+                    @Override
+                    public Map<String, PreferenceValue> filter(@NonNull String fileName, @NonNull Map<String, PreferenceValue> map) {
+                        return map;
+                    }
+                })
+                .addLogMonitor(new LogMonitor.Filter() {
+                    @Nullable
+                    @Override
+                    public LogEvent filter(@NonNull LogEvent logEvent) {
+                        return logEvent;
+                    }
+                })
+                .addSQLMonitor(new SQLiteMonitor.DatabaseConnectionFactory() {
+                    @NonNull
+                    @Override
+                    public DatabaseConnection createDatabaseConnection(@NonNull com.appspector.sdk.monitors.sqlite.model.Database database) {
+                        if ("my_SQLCipher_db".equals(database.name)) {
+                            return new SQLCipherDatabaseConnection(database, "password");
+                        }
+                        return new SQLiteDatabaseConnection(database);
+                    }
+                })
+                .addHttpMonitor(new HTTPFilter() {
+                    @Nullable
+                    @Override
+                    public HttpRequest filter(HttpRequest httpRequest) {
+                        return httpRequest;
+                    }
+
+                    @Nullable
+                    @Override
+                    public HttpResponse filter(HttpResponse httpResponse) {
+                        return httpResponse;
+                    }
+                })
+                .collectDataInBackground(false)
+                .enableEncryption("TODO")
+                .run("TODO");
+
+        AppSpector.shared().setSessionUrlListener(new SessionUrlListener() {
+            @Override
+            public void onReceived(@NonNull String s) {
+                // Nothing
+            }
+        });
+
+        AppSpector.shared().commands().register(UrlConnectionCommand.class, new CommandCallback<String, UrlConnectionCommand>() {
+            @Override
+            public void exec(@NonNull UrlConnectionCommand urlConnectionCommand, @NonNull Responder<String> responder) {
+                HttpURLConnection connection = null;
+                try {
+                    connection = (HttpURLConnection) UrlInstrument.openConnection(new URL(urlConnectionCommand.url));
+                    responder.ok(connection.getResponseCode() + " " + connection.getResponseMessage());
+                } catch (Throwable e) {
+                    Log.d("WTF", "Cannot execute command", e);
+                    responder.error(e.getMessage());
+                } finally {
+                    if (connection != null) {
+                        try {
+                            connection.disconnect();
+                        } catch (Throwable e) {
+                            Log.d("WTF", "Cannot disconnect client", e);
+                        }
+                    }
+                }
+            }
+        });
+
+        AppspectorLogger.AndroidLogger.enableDebugLogging(true);
+
+        CustomEventsSender.send(new TestEvent());
+    }
+
+
+    @Command(value = "Perform UrlConnection request", category = "Debug")
+    public static class UrlConnectionCommand extends BaseCommand<String> {
+        @Argument(isRequired = true)
+        public String url;
+    }
+
+    public static class TestEvent implements CustomEventPayload {
+
+        @NonNull
+        @Override
+        public String getName() {
+            return "Test event";
+        }
+
+        @NonNull
+        @Override
+        public String getCategory() {
+            return "SDK Test";
+        }
+
+        @NonNull
+        @Override
+        public Map<String, Object> getPayload() {
+            final Map<String, Object> payload = new HashMap<>();
+            payload.put("test", 10);
+            payload.put("test1", "tessssttt");
+            return payload;
+        }
     }
 
     public int getVersionCode() {
